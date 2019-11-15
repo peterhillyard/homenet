@@ -1,4 +1,5 @@
 import ethpy as ethpy
+import netpy as netpy
 import struct as struct
 import const as c
 
@@ -53,11 +54,11 @@ class ARPSender(ethpy.EthernetSender):
         self.const_arp_part_as_bytes = tmp
 
     def send_arp_request(self, dest_ip_with_dots, dest_hw_with_colons=None):
-        trgt_ip_as_bytes = self.convert_ip_with_dots_to_bytes(dest_ip_with_dots)
+        trgt_ip_as_bytes = netpy.convert_ip_with_dots_to_bytes(dest_ip_with_dots)
         arp_bytes = self.const_arp_part_as_bytes
 
         if dest_hw_with_colons:
-            eth_bytes = self.convert_mac_with_colon_to_bytes(dest_hw_with_colons)
+            eth_bytes = netpy.convert_mac_with_colon_to_bytes(dest_hw_with_colons)
             arp_bytes += eth_bytes
         else:
             eth_bytes = c.arp_broadcast_eth_dest_mac

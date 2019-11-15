@@ -70,22 +70,39 @@ class Net:
 
         self.ip_as_bytes = info[20:24]
 
-    def convert_mac_with_colon_to_bytes(self, mac_with_colons_str):
-        """
-        Converts a MAC address in string form to hex
-        e.g. '01:02:03:04:05:06' -> b'\x01\x02\x03\x04\x05\x06'
-        """
-        mac_no_colon_str = mac_with_colons_str.replace(':', '')
-        return ba.unhexlify(mac_no_colon_str)
 
-    def convert_ip_with_dots_to_bytes(self, ip_with_dots):
-        """
-        Converts a MAC address in string form to hex
-        e.g. '192.168.0.1' -> b'\xc0\xa8\x00\x01'
-        """
-        return socket.inet_aton(ip_with_dots)
+def convert_mac_with_colon_to_bytes(mac_with_colons_str):
+    """
+    Converts a MAC address in string form with colons to bytes
+    e.g. '01:02:03:04:05:06' -> b'\x01\x02\x03\x04\x05\x06'
+    """
+    mac_no_colon_str = mac_with_colons_str.replace(':', '')
+    return ba.unhexlify(mac_no_colon_str)
 
 
+def convert_mac_as_bytes_to_str_with_colons(mac_as_bytes):
+    """
+    Converts a MAC address as bytes to string form with colons
+    e.g. b'\x01\x02\x03\x04\x05\x06' -> '01:02:03:04:05:06'
+    """
+    mac_no_colons = ba.hexlify(mac_as_bytes).decode('utf-8')
+    return ':'.join([mac_no_colons[ii:ii+2] for ii in range(0, 12, 2)])
+
+
+def convert_ip_with_dots_to_bytes(ip_with_dots):
+    """
+    Converts an IP address in string form with dots to bytes
+    e.g. '192.168.0.1' -> b'\xc0\xa8\x00\x01'
+    """
+    return socket.inet_aton(ip_with_dots)
+
+
+def convert_ip_as_bytes_to_str_with_dots(ip_as_bytes):
+    """
+    Converts an IP address in string form with dots to bytes
+    e.g. b'\xc0\xa8\x00\x01' -> '192.168.0.1'
+    """
+    return socket.inet_ntoa(ip_as_bytes)
 
 
 def net_main():
