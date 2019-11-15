@@ -17,12 +17,14 @@ class ARPListener(ethpy.EthernetListener):
         self.arp_data = {key: None for key in c.arp_packet_parts}
 
     def recv_arp_packet(self):
+        key = 'eth_type_as_bytes'
         is_arp_packet = False
         while not is_arp_packet:
             self.recv_ethernet_packet()
-            is_arp_packet = self.ethernet_data['eth_type_as_bytes'] == self.arp_eth_type
+            is_arp_packet = self.ethernet_data[key] == self.arp_eth_type
 
-        arp_packet = self.ethernet_data['payload_as_bytes'][:self.num_bytes_in_arp_packet]
+        key = 'payload_as_bytes'
+        arp_packet = self.ethernet_data[key][:self.num_bytes_in_arp_packet]
         tmp = struct.unpack(c.arp_packet_fmt, arp_packet)
 
         for ii in range(len(c.arp_packet_parts)):
