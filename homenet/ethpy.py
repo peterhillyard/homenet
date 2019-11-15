@@ -6,6 +6,7 @@ import const as c
 class EthernetListener:
 
     def __init__(self):
+        self.num_bytes_in_eth_header = struct.calcsize(c.ethernet_header_fmt)
         self._init_ethernet_data()
         self._open_socket()
 
@@ -25,12 +26,12 @@ class EthernetListener:
     def recv_ethernet_packet(self):
         packet_data, packet_meta = self.listen_socket.recvfrom(2048)
 
-        ethernet_header = packet_data[0:14]
+        ethernet_header = packet_data[:self.num_bytes_in_eth_header]
         tmp = struct.unpack(c.ethernet_header_fmt, ethernet_header)
 
         for ii in range(3):
             self.ethernet_data[c.ethernet_packet_parts[ii]] = tmp[ii]
-        self.ethernet_data[c.ethernet_packet_parts[-1]] = packet_data[14:]
+        self.ethernet_data[c.ethernet_packet_parts[-1]] = packet_data[self.num_bytes_in_eth_header:]
 
 
 def ethernet_listener_main():
