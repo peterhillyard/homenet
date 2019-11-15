@@ -1,3 +1,5 @@
 {
-  "interface_name": "wlan0"
+  "interface_name": "wlan0",
+  "pub_facing_endpoint": "ipc:///tmp/arp_pub_facing_endpoint",
+  "sub_facing_endpoint": "ipc:///tmp/arp_sub_facing_endpoint"
 }
