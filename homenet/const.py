@@ -1,4 +1,5 @@
-ethernet_header_parts = [
+# Ethernet packet parts
+ethernet_packet_parts = [
     'dest_mac_as_bytes',
     'src_mac_as_bytes',
     'eth_type_as_bytes',

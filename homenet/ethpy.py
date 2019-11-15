@@ -20,7 +20,7 @@ class EthernetListener:
         self.listen_socket.close()
 
     def _init_ethernet_data(self):
-        self.ethernet_data = {key: None for key in c.ethernet_header_parts}
+        self.ethernet_data = {key: None for key in c.ethernet_packet_parts}
 
     def recv_ethernet_packet(self):
         packet_data, packet_meta = self.listen_socket.recvfrom(2048)
@@ -29,8 +29,8 @@ class EthernetListener:
         tmp = struct.unpack(c.ethernet_header_fmt, ethernet_header)
 
         for ii in range(3):
-            self.ethernet_data[c.ethernet_header_parts[ii]] = tmp[ii]
-        self.ethernet_data[c.ethernet_header_parts[-1]] = packet_data[14:]
+            self.ethernet_data[c.ethernet_packet_parts[ii]] = tmp[ii]
+        self.ethernet_data[c.ethernet_packet_parts[-1]] = packet_data[14:]
 
 
 def ethernet_listener_main():
