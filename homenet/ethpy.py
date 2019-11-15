@@ -1,6 +1,8 @@
 import socket as socket
 import struct as struct
+
 import const as c
+import netpy as netpy
 
 
 class EthernetListener:
@@ -35,6 +37,37 @@ class EthernetListener:
         self.ethernet_data[key] = packet_data[self.num_bytes_in_eth_header:]
 
 
+class EthernetSender(netpy.Net):
+
+    def __init__(self, iface_name=None):
+        super().__init__(iface_name)
+        self.open_socket()
+
+    def open_socket(self):
+
+        self.send_socket = socket.socket(
+            socket.PF_PACKET,
+            socket.SOCK_RAW,
+            socket.htons(0x0800)
+        )
+        self.send_socket.bind((self.interface_name, socket.htons(0x0800)))
+
+    def close_socket(self):
+        self.send_socket.close()
+
+    def send_frame(self, eth_hdr_dict, payload_as_bytes):
+        if eth_hdr_dict['src_mac_as_bytes']:
+            eth_hdr_bytes = eth_hdr_dict['dest_mac_as_bytes']
+            eth_hdr_bytes += eth_hdr_dict['src_mac_as_bytes']
+            eth_hdr_bytes += eth_hdr_dict['eth_type_as_bytes']
+        else:
+            eth_hdr_bytes = eth_hdr_dict['dest_mac_as_bytes']
+            eth_hdr_bytes += self.iface_mac_as_bytes
+            eth_hdr_bytes += eth_hdr_dict['eth_type_as_bytes']
+
+        self.send_socket.send(eth_hdr_bytes + payload_as_bytes)
+
+
 def ethernet_listener_main():
     listener = EthernetListener()
 
@@ -48,5 +81,12 @@ def ethernet_listener_main():
             listener.close_socket()
 
 
+def ethernet_sender_main():
+    sender = EthernetSender()
+
+    sender.close_socket()
+
+
 if __name__ == '__main__':
-    ethernet_listener_main()
+    # ethernet_listener_main()
+    ethernet_sender_main()
