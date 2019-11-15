@@ -12,3 +12,9 @@ class SettingsConfig:
 
     def get_interface(self):
         return self.cfg_dict['interface_name']
+
+    def get_sub_facing_endpoint(self):
+        return self.cfg_dict['sub_facing_endpoint']
+
+    def get_pub_facing_endpoint(self):
+        return self.cfg_dict['pub_facing_endpoint']
