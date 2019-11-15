@@ -56,14 +56,9 @@ class EthernetSender(netpy.Net):
         self.send_socket.close()
 
     def send_frame(self, eth_hdr_dict, payload_as_bytes):
-        if eth_hdr_dict['src_mac_as_bytes']:
-            eth_hdr_bytes = eth_hdr_dict['dest_mac_as_bytes']
-            eth_hdr_bytes += eth_hdr_dict['src_mac_as_bytes']
-            eth_hdr_bytes += eth_hdr_dict['eth_type_as_bytes']
-        else:
-            eth_hdr_bytes = eth_hdr_dict['dest_mac_as_bytes']
-            eth_hdr_bytes += self.iface_mac_as_bytes
-            eth_hdr_bytes += eth_hdr_dict['eth_type_as_bytes']
+        eth_hdr_bytes = eth_hdr_dict['dest_mac_as_bytes']
+        eth_hdr_bytes += eth_hdr_dict['src_mac_as_bytes']
+        eth_hdr_bytes += eth_hdr_dict['eth_type_as_bytes']
 
         self.send_socket.send(eth_hdr_bytes + payload_as_bytes)
 
