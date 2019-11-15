@@ -7,13 +7,9 @@ import os as os
 from base import SettingsConfig
 
 
-class Net:
+class NetworkInterface:
 
     def __init__(self, sys_settings_fname=None):
-        self.interface_name = None
-        self.mac_as_bytes = None
-        self.ip_as_bytes = None
-
         self.get_interface(sys_settings_fname)
         self.get_interface_mac_as_bytes()
         self.get_interface_ip_as_bytes()

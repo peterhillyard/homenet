@@ -6,8 +6,8 @@ import const as c
 
 class ARPListener(ethpy.EthernetListener):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, sys_settings_fname=None):
+        super().__init__(sys_settings_fname)
 
         self.arp_eth_type = c.arp_eth_type
         self.num_bytes_in_arp_packet = struct.calcsize(c.arp_packet_fmt)
@@ -69,11 +69,9 @@ class ARPSender(ethpy.EthernetSender):
     def __init__(self, sys_settings_fname=None):
         super().__init__(sys_settings_fname)
 
-        self.set_some_bytes()
-
     def set_some_bytes(self):
-        mac_as_bytes = self.get_interface_mac_as_bytes()
-        ip_as_bytes = self.get_interface_ip_as_bytes()
+        mac_as_bytes = self.net_interface.get_interface_mac_as_bytes()
+        ip_as_bytes = self.net_interface.get_interface_ip_as_bytes()
 
         tmp = mac_as_bytes
         tmp += c.arp_eth_type
@@ -128,7 +126,7 @@ def arp_sender_main():
 
 
 def arp_listener_main():
-    listener = ARPListener()
+    listener = ARPListener('sys_settings.json')
 
     is_running = True
     while is_running:

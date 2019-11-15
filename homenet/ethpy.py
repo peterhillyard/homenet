@@ -7,7 +7,8 @@ import netpy as netpy
 
 class EthernetListener:
 
-    def __init__(self):
+    def __init__(self, sys_settings_fname=None):
+        self.net_interface = netpy.NetworkInterface(sys_settings_fname)
         self.num_bytes_in_eth_header = struct.calcsize(c.ethernet_header_fmt)
         self._init_ethernet_data()
         self._open_socket()
@@ -52,20 +53,22 @@ class EthernetListener:
         )
 
 
-class EthernetSender(netpy.Net):
+class EthernetSender:
 
     def __init__(self, sys_settings_fname=None):
-        super().__init__(sys_settings_fname)
+        self.net_interface = netpy.NetworkInterface(sys_settings_fname)
         self.open_socket()
 
     def open_socket(self):
-
         self.send_socket = socket.socket(
             socket.PF_PACKET,
             socket.SOCK_RAW,
             socket.htons(0x0800)
         )
-        self.send_socket.bind((self.interface_name, socket.htons(0x0800)))
+
+        self.send_socket.bind(
+            (self.net_interface.interface_name, socket.htons(0x0800))
+        )
 
     def close_socket(self):
         self.send_socket.close()
@@ -88,11 +91,15 @@ def ethernet_listener_main():
 
 
 def ethernet_sender_main():
-    sender = EthernetSender()
+    sender = EthernetSender('sys_settings.json')
 
     sender.close_socket()
 
 
 if __name__ == '__main__':
-    # ethernet_listener_main()
-    ethernet_sender_main()
+    import sys
+
+    if 'listen' in sys.argv:
+        ethernet_listener_main()
+    elif 'send' in sys.argv:
+        ethernet_sender_main()
