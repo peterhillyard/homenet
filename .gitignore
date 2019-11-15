@@ -1,5 +1,9 @@
 # directories
 venv*/
+__pycache__
 
 # configs
 .vscode
+
+# files
+*.pyc
