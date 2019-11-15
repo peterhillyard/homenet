@@ -60,6 +60,7 @@ class Net:
         s.close()
 
         self.mac_as_bytes = info[18:24]
+        return self.mac_as_bytes
 
     def get_interface_ip_as_bytes(self):
         s1 = struct.Struct('256s')
@@ -69,6 +70,7 @@ class Net:
         s.close()
 
         self.ip_as_bytes = info[20:24]
+        return self.ip_as_bytes
 
 
 def convert_mac_with_colon_to_bytes(mac_with_colons_str):

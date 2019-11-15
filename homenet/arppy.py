@@ -69,20 +69,26 @@ class ARPSender(ethpy.EthernetSender):
     def __init__(self, iface_name=None):
         super().__init__(iface_name)
 
-        self.init_some_bytes()
+        self.set_some_bytes()
 
-    def init_some_bytes(self):
-        tmp = self.mac_as_bytes + c.arp_eth_type
+    def set_some_bytes(self):
+        mac_as_bytes = self.get_interface_mac_as_bytes()
+        ip_as_bytes = self.get_interface_ip_as_bytes()
+
+        tmp = mac_as_bytes
+        tmp += c.arp_eth_type
         self.const_eth_hdr_part_as_bytes = tmp
 
         tmp = b''
         for key in c.arp_packet_const_names:
             tmp += c.arp_packet_consts[key]
-        tmp += self.mac_as_bytes
-        tmp += self.ip_as_bytes
+        tmp += mac_as_bytes
+        tmp += ip_as_bytes
         self.const_arp_part_as_bytes = tmp
 
     def send_arp_request(self, dest_ip_with_dots, dest_hw_with_colons=None):
+        self.set_some_bytes()
+
         trgt_ip_as_bytes = netpy.convert_ip_with_dots_to_bytes(
             dest_ip_with_dots
         )
