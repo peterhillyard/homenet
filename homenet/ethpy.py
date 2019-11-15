@@ -54,8 +54,8 @@ class EthernetListener:
 
 class EthernetSender(netpy.Net):
 
-    def __init__(self, iface_name=None):
-        super().__init__(iface_name)
+    def __init__(self, sys_settings_fname=None):
+        super().__init__(sys_settings_fname)
         self.open_socket()
 
     def open_socket(self):

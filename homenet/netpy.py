@@ -4,21 +4,24 @@ import fcntl as fcntl
 import binascii as ba
 import os as os
 
+from base import SettingsConfig
+
 
 class Net:
 
-    def __init__(self, iface_name=None):
+    def __init__(self, sys_settings_fname=None):
         self.interface_name = None
         self.mac_as_bytes = None
         self.ip_as_bytes = None
 
-        self.get_interface(iface_name)
+        self.get_interface(sys_settings_fname)
         self.get_interface_mac_as_bytes()
         self.get_interface_ip_as_bytes()
 
-    def get_interface(self, iface_name):
-        if iface_name:
-            self.interface_name = iface_name
+    def get_interface(self, sys_settings_fname):
+        if sys_settings_fname:
+            sc = SettingsConfig(sys_settings_fname)
+            self.interface_name = sc.get_interface()
         else:
             self.pick_interface_from_list()
 

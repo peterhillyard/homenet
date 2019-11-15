@@ -66,8 +66,8 @@ class ARPListener(ethpy.EthernetListener):
 
 class ARPSender(ethpy.EthernetSender):
 
-    def __init__(self, iface_name=None):
-        super().__init__(iface_name)
+    def __init__(self, sys_settings_fname=None):
+        super().__init__(sys_settings_fname)
 
         self.set_some_bytes()
 
@@ -111,7 +111,7 @@ class ARPSender(ethpy.EthernetSender):
 
 def arp_sender_main():
     import time as time
-    sender = ARPSender()
+    sender = ARPSender('sys_settings.json')
 
     prev_time = time.time()
     is_running = True
