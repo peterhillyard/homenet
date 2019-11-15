@@ -6,7 +6,7 @@ import const as c
 
 class ARPListener(ethpy.EthernetListener):
 
-    def __init__(self, sys_settings_fname=None):
+    def __init__(self, sys_settings_fname):
         super().__init__(sys_settings_fname)
 
         self.arp_eth_type = c.arp_eth_type
@@ -18,21 +18,46 @@ class ARPListener(ethpy.EthernetListener):
         self.arp_data = {key: None for key in c.arp_packet_parts}
 
     def recv_arp_packet(self):
-
         # Loop until we get an ARP type ethernet packet
-        key = 'eth_type_as_bytes'
-        is_arp_packet = False
-        while not is_arp_packet:
+        is_arp_pkt = False
+        while not is_arp_pkt:
             self.recv_ethernet_packet()
-            is_arp_packet = self.ethernet_data[key] == self.arp_eth_type
+            is_arp_pkt = self.is_arp_packet()
 
-        # Unpacket the ethernet payload into an ARP data dictionary
+        self.unpack_eth_payload_into_arp_data()
+
+    def is_arp_packet(self):
+        return self.ethernet_data['eth_type_as_bytes'] == self.arp_eth_type
+
+    def unpack_eth_payload_into_arp_data(self):
+        # Unpack the ethernet payload into an ARP data dictionary
         key = 'payload_as_bytes'
         arp_packet = self.ethernet_data[key][:self.num_bytes_in_arp_packet]
         tmp = struct.unpack(c.arp_packet_fmt, arp_packet)
 
         for ii in range(len(c.arp_packet_parts)):
             self.arp_data[c.arp_packet_parts[ii]] = tmp[ii]
+
+    def get_styled_arp_data(self):
+        src_mac = netpy.convert_mac_as_bytes_to_str_with_colons(
+            self.arp_data['sender_mac_as_bytes']
+        )
+        src_ip = netpy.convert_ip_as_bytes_to_str_with_dots(
+            self.arp_data['sender_ip_add_as_bytes']
+        )
+        dst_mac = netpy.convert_mac_as_bytes_to_str_with_colons(
+            self.arp_data['target_mac_as_bytes']
+        )
+        dst_ip = netpy.convert_ip_as_bytes_to_str_with_dots(
+            self.arp_data['target_ip_add_as_bytes']
+        )
+        ret_dict = {
+            'sender_mac_as_str_with_colons': src_mac,
+            'sender_ip_as_str_with_dots': src_ip,
+            'target_mac_as_str_with_colons': dst_mac,
+            'target_ip_as_str_with_dots': dst_ip,
+        }
+        return ret_dict
 
     def print_arp_data(self):
         print('hardware type: {}'.format(
@@ -63,15 +88,18 @@ class ARPListener(ethpy.EthernetListener):
             )
         )
 
+    def clean_up(self):
+        self.close_socket()
+
 
 class ARPSender(ethpy.EthernetSender):
 
-    def __init__(self, sys_settings_fname=None):
+    def __init__(self, sys_settings_fname):
         super().__init__(sys_settings_fname)
 
     def set_some_bytes(self):
-        mac_as_bytes = self.net_interface.get_interface_mac_as_bytes()
-        ip_as_bytes = self.net_interface.get_interface_ip_as_bytes()
+        mac_as_bytes = self.net_interface.get_interface_mac()
+        ip_as_bytes = self.net_interface.get_interface_ip()
 
         tmp = mac_as_bytes
         tmp += c.arp_eth_type
@@ -106,6 +134,9 @@ class ARPSender(ethpy.EthernetSender):
 
         self.send_frame(eth_bytes, arp_bytes)
 
+    def clean_up(self):
+        self.close_socket()
+
 
 def arp_sender_main():
     import time as time
@@ -122,7 +153,7 @@ def arp_sender_main():
                 print('msg sent', cur_time)
         except KeyboardInterrupt:
             is_running = False
-            sender.close_socket()
+            sender.clean_up()
 
 
 def arp_listener_main():
@@ -137,7 +168,7 @@ def arp_listener_main():
             print('')
         except KeyboardInterrupt:
             is_running = False
-            listener.close_socket()
+            listener.clean_up()
 
 
 if __name__ == '__main__':

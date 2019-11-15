@@ -7,7 +7,7 @@ import netpy as netpy
 
 class EthernetListener:
 
-    def __init__(self, sys_settings_fname=None):
+    def __init__(self, sys_settings_fname):
         self.net_interface = netpy.NetworkInterface(sys_settings_fname)
         self.num_bytes_in_eth_header = struct.calcsize(c.ethernet_header_fmt)
         self._init_ethernet_data()
@@ -55,7 +55,7 @@ class EthernetListener:
 
 class EthernetSender:
 
-    def __init__(self, sys_settings_fname=None):
+    def __init__(self, sys_settings_fname):
         self.net_interface = netpy.NetworkInterface(sys_settings_fname)
         self.open_socket()
 
@@ -78,7 +78,7 @@ class EthernetSender:
 
 
 def ethernet_listener_main():
-    listener = EthernetListener()
+    listener = EthernetListener('sys_settings.json')
 
     is_running = True
     while is_running:

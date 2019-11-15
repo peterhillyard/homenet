@@ -11,8 +11,6 @@ class NetworkInterface:
 
     def __init__(self, sys_settings_fname=None):
         self.get_interface(sys_settings_fname)
-        self.get_interface_mac_as_bytes()
-        self.get_interface_ip_as_bytes()
 
     def get_interface(self, sys_settings_fname):
         if sys_settings_fname:
@@ -51,25 +49,29 @@ class NetworkInterface:
             print('\nInvalid input. Please try again: ')
             return False
 
-    def get_interface_mac_as_bytes(self):
+    def get_interface_mac(self, ret_type=''):
         s1 = struct.Struct('256s')
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         ifname_packed = s1.pack(self.interface_name.encode('utf-8'))
         info = fcntl.ioctl(s.fileno(), 0x8927,  ifname_packed)
         s.close()
 
-        self.mac_as_bytes = info[18:24]
-        return self.mac_as_bytes
+        if ret_type == 'str_colons':
+            return convert_mac_as_bytes_to_str_with_colons(info[18:24])
+        else:
+            return info[18:24]
 
-    def get_interface_ip_as_bytes(self):
+    def get_interface_ip(self, ret_type=''):
         s1 = struct.Struct('256s')
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         ifname_packed = s1.pack(self.interface_name.encode('utf-8'))
         info = fcntl.ioctl(s.fileno(), 0x8915, ifname_packed)
         s.close()
 
-        self.ip_as_bytes = info[20:24]
-        return self.ip_as_bytes
+        if ret_type == 'str_dots':
+            return convert_ip_as_bytes_to_str_with_dots(info[20:24])
+        else:
+            return info[20:24]
 
 
 def convert_mac_with_colon_to_bytes(mac_with_colons_str):
@@ -107,10 +109,10 @@ def convert_ip_as_bytes_to_str_with_dots(ip_as_bytes):
 
 
 def net_main():
-    a_net = Net()
+    a_net = NetworkInterface()
 
-    print('MAC', a_net.mac_as_bytes)
-    print('IP', a_net.ip_as_bytes)
+    print('MAC', a_net.get_interface_mac())
+    print('IP', a_net.get_interface_ip())
 
 
 if __name__ == '__main__':
