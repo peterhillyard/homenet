@@ -37,4 +37,25 @@ arp_packet_parts = [
 # - 4 bytes for target IP address
 arp_packet_fmt = '2s2s1s1s2s6s4s6s4s'
 
+# Ethernet types
 arp_eth_type = b'\x08\x06'
+
+# ARP packet constants
+arp_packet_const_names = [
+    'htype',
+    'ptype',
+    'hlen',
+    'plen',
+    'operation',
+]
+arp_packet_consts = {
+    'htype': b'\x00\x01',      # Hardware type (ethernet)
+    'ptype': b'\x08\x00',      # Protocol type (TCP)
+    'hlen': b'\x06',           # Hardware address length
+    'plen': b'\x04',           # Protocol address length
+    'operation': b'\x00\x01',  # 1=request/2=reply
+}
+
+# ARP packet contents
+arp_broadcast_eth_dest_mac = b'\xff\xff\xff\xff\xff\xff'  # target mac address (all 1s to make it a broadcast)
+arp_broadcast_arp_trgt_mac = b'\x00\x00\x00\x00\x00\x00'  # target mac address (all zeros bc we don't know it yet)
