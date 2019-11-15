@@ -42,7 +42,8 @@ class SmartARPSender(arppy.ARPSender):
         self.comms.set_subscriptions(self.sub_list)
         self.broadcast_interval = 60.0
         self.num_direct_between_broadcasts = 2
-        self.direct_interval = self.broadcast_interval / (self.num_direct_between_broadcasts + 1)
+        self.direct_interval = \
+            self.broadcast_interval / (self.num_direct_between_broadcasts + 1)
 
         self.prev_broadcast_time = 0
         self.prev_direct_arp_time = 0
