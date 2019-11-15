@@ -36,3 +36,5 @@ arp_packet_parts = [
 # - 6 bytes for target mac address
 # - 4 bytes for target IP address
 arp_packet_fmt = '2s2s1s1s2s6s4s6s4s'
+
+arp_eth_type = b'\x08\x06'

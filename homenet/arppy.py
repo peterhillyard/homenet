@@ -8,7 +8,7 @@ class ARPListener(ethpy.EthernetListener):
     def __init__(self):
         super().__init__()
 
-        self.arp_eth_type = b'\x08\x06'
+        self.arp_eth_type = c.arp_eth_type
         self.num_bytes_in_arp_packet = struct.calcsize(c.arp_packet_fmt)
 
         self._init_arp_data()
