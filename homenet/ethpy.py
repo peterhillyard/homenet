@@ -31,7 +31,8 @@ class EthernetListener:
 
         for ii in range(3):
             self.ethernet_data[c.ethernet_packet_parts[ii]] = tmp[ii]
-        self.ethernet_data[c.ethernet_packet_parts[-1]] = packet_data[self.num_bytes_in_eth_header:]
+        key = c.ethernet_packet_parts[-1]
+        self.ethernet_data[key] = packet_data[self.num_bytes_in_eth_header:]
 
 
 def ethernet_listener_main():
