@@ -9,6 +9,7 @@ class ARPListener(ethpy.EthernetListener):
         super().__init__()
 
         self.arp_eth_type = b'\x08\x06'
+        self.num_bytes_in_arp_packet = struct.calcsize(c.arp_packet_fmt)
 
         self._init_arp_data()
 
@@ -21,20 +22,11 @@ class ARPListener(ethpy.EthernetListener):
             self.recv_ethernet_packet()
             is_arp_packet = self.ethernet_data['eth_type_as_bytes'] == self.arp_eth_type
 
-        arp_packet = self.ethernet_data['payload_as_bytes'][0:28]
+        arp_packet = self.ethernet_data['payload_as_bytes'][:self.num_bytes_in_arp_packet]
         tmp = struct.unpack(c.arp_packet_fmt, arp_packet)
 
         for ii in range(len(c.arp_packet_parts)):
             self.arp_data[c.arp_packet_parts[ii]] = tmp[ii]
-
-        # opcode    = arp_detailed[4]
-        # src_mac   = ethernet_detailed[1]
-        # if (ethertype == self.arp_code) and (opcode == self.reply_code) and (src_mac in self.mac_hex_list):
-        #     ret_dict = {
-        #         "eth_detailed": ethernet_detailed,
-        #         "arp_detailed": arp_detailed
-        #     }
-        # return ret_dict
 
 
 def arp_listener_main():
