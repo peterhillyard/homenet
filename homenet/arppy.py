@@ -58,7 +58,7 @@ class ARPSender(ethpy.EthernetSender):
 
         if dest_hw_with_colons:
             eth_bytes = self.convert_mac_with_colon_to_bytes(dest_hw_with_colons)
-            arp_bytes += dest_mac_as_bytes
+            arp_bytes += eth_bytes
         else:
             eth_bytes = c.arp_broadcast_eth_dest_mac
             arp_bytes += c.arp_broadcast_arp_trgt_mac
@@ -80,7 +80,7 @@ def arp_sender_main():
             cur_time = time.time()
             if cur_time - prev_time > 3:
                 prev_time = cur_time
-                sender.send_arp_request('10.0.0.7')
+                sender.send_arp_request('10.0.0.7', '70:EC:E4:15:C9:D1')
                 print('msg sent', cur_time)
         except KeyboardInterrupt:
             is_running = False
