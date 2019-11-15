@@ -34,6 +34,35 @@ class ARPListener(ethpy.EthernetListener):
         for ii in range(len(c.arp_packet_parts)):
             self.arp_data[c.arp_packet_parts[ii]] = tmp[ii]
 
+    def print_arp_data(self):
+        print('hardware type: {}'.format(
+            self.arp_data['hardware_type_as_bytes'])
+        )
+        print('protocol type: {}'.format(
+            self.arp_data['protocol_type_as_bytes'])
+        )
+        print('operation: {}'.format(self.arp_data['operation_as_bytes']))
+        print('sender mac: {}'.format(
+            netpy.convert_mac_as_bytes_to_str_with_colons(
+                self.arp_data['sender_mac_as_bytes'])
+            )
+        )
+        print('sender ip: {}'.format(
+            netpy.convert_ip_as_bytes_to_str_with_dots(
+                self.arp_data['sender_ip_add_as_bytes'])
+            )
+        )
+        print('target mac: {}'.format(
+            netpy.convert_mac_as_bytes_to_str_with_colons(
+                self.arp_data['target_mac_as_bytes'])
+            )
+        )
+        print('target ip: {}'.format(
+            netpy.convert_ip_as_bytes_to_str_with_dots(
+                self.arp_data['target_ip_add_as_bytes'])
+            )
+        )
+
 
 class ARPSender(ethpy.EthernetSender):
 
@@ -54,11 +83,15 @@ class ARPSender(ethpy.EthernetSender):
         self.const_arp_part_as_bytes = tmp
 
     def send_arp_request(self, dest_ip_with_dots, dest_hw_with_colons=None):
-        trgt_ip_as_bytes = netpy.convert_ip_with_dots_to_bytes(dest_ip_with_dots)
+        trgt_ip_as_bytes = netpy.convert_ip_with_dots_to_bytes(
+            dest_ip_with_dots
+        )
         arp_bytes = self.const_arp_part_as_bytes
 
         if dest_hw_with_colons:
-            eth_bytes = netpy.convert_mac_with_colon_to_bytes(dest_hw_with_colons)
+            eth_bytes = netpy.convert_mac_with_colon_to_bytes(
+                dest_hw_with_colons
+            )
             arp_bytes += eth_bytes
         else:
             eth_bytes = c.arp_broadcast_eth_dest_mac
@@ -95,7 +128,8 @@ def arp_listener_main():
     while is_running:
         try:
             listener.recv_arp_packet()
-            print(listener.arp_data)
+            listener.print_eth_data()
+            listener.print_arp_data()
             print('')
         except KeyboardInterrupt:
             is_running = False

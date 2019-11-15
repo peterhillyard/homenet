@@ -36,6 +36,21 @@ class EthernetListener:
         key = c.ethernet_packet_parts[-1]
         self.ethernet_data[key] = packet_data[self.num_bytes_in_eth_header:]
 
+    def print_eth_data(self):
+        print('Destination MAC - {}'.format(
+            netpy.convert_mac_as_bytes_to_str_with_colons(
+                self.ethernet_data['dest_mac_as_bytes'])
+            )
+        )
+        print('Source MAC - {}'.format(
+            netpy.convert_mac_as_bytes_to_str_with_colons(
+                self.ethernet_data['src_mac_as_bytes'])
+            )
+        )
+        print('Ether type - {}'.format(
+            self.ethernet_data['eth_type_as_bytes'])
+        )
+
 
 class EthernetSender(netpy.Net):
 
