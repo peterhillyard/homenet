@@ -1,5 +1,6 @@
 # directories
 venv*/
+creds/
 __pycache__
 
 # configs
