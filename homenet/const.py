@@ -57,5 +57,7 @@ arp_packet_consts = {
 }
 
 # ARP packet contents
-arp_broadcast_eth_dest_mac = b'\xff\xff\xff\xff\xff\xff'  # target mac address (all 1s to make it a broadcast)
-arp_broadcast_arp_trgt_mac = b'\x00\x00\x00\x00\x00\x00'  # target mac address (all zeros bc we don't know it yet)
+# target mac address (all 1s to make it a broadcast)
+arp_broadcast_eth_dest_mac = b'\xff\xff\xff\xff\xff\xff'
+# target mac address (all zeros bc we don't know it yet)
+arp_broadcast_arp_trgt_mac = b'\x00\x00\x00\x00\x00\x00'
