@@ -1,6 +1,4 @@
 # Primary packages
-gspread==3.1.0
-oauth2client==4.1.3
 pylama==7.7.1
 pyzmq==18.1.1
 
