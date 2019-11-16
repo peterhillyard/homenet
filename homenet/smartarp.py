@@ -76,11 +76,14 @@ class SmartARPSender(arppy.ARPSender):
            (cur_time - self.prev_broadcast_time > self.direct_interval):
             print('direct', cur_time)
             self.prev_direct_arp_time = cur_time
+            self.send_direct()
 
         # Check for new mac tables
         msg = self.comms.recv_msg()
         if msg:
             self.replace_old_table(msg)
+
+        time.sleep(0.1)
 
     def send_broadcast(self):
         ip_addr = self.net_interface.get_interface_ip('str_dots')
@@ -90,6 +93,9 @@ class SmartARPSender(arppy.ARPSender):
             dst_ip = ip_hdr + '.{}'.format(ii)
             self.send_arp_request(dst_ip)
             time.sleep(0.006)
+
+    def send_direct(self):
+        pass
 
     def replace_old_table(self, msg):
         pass
