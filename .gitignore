@@ -8,3 +8,4 @@ __pycache__
 # files
 *.pyc
 sys_settings.json
+device_table.json
