@@ -2,6 +2,8 @@ import arppy as arppy
 import comms as comms
 import time as time
 
+import const as c
+
 
 class SmartARPListener(arppy.ARPListener):
 
@@ -15,8 +17,9 @@ class SmartARPListener(arppy.ARPListener):
         # Get an ethernet packet
         self.recv_ethernet_packet()
 
-        # Send out arp data if it was an arp packet
-        if self.is_arp_packet():
+        # Send out arp data if it was an arp packet and not a broadcast
+        # from the device running this code
+        if self.is_arp_packet() and not self.is_known_broadcast():
             self.unpack_eth_payload_into_arp_data()
             self.comms.send_msg('new_arp_pkt', self.get_styled_arp_data())
 
@@ -24,6 +27,15 @@ class SmartARPListener(arppy.ARPListener):
         msg = self.comms.recv_msg()
         if msg:
             self.replace_old_table(msg)
+
+    def is_known_broadcast(self):
+        dst_mac = self.ethernet_data['dest_mac_as_bytes']
+        cond1 = dst_mac == c.arp_broadcast_eth_dest_mac
+
+        src_mac = self.ethernet_data['src_mac_as_bytes']
+        cond2 = src_mac == self.net_interface.get_interface_mac()
+
+        return cond1 and cond2
 
     def replace_old_table(self, msg):
         pass
