@@ -1,17 +1,17 @@
 import arppy as arppy
 import comms as comms
 import time as time
+import json as json
 
 import const as c
+import devicetable as devtbl
 
 
 class SmartARPListener(arppy.ARPListener):
 
     def __init__(self, sys_settings_fname=None):
         super().__init__(sys_settings_fname)
-        self.sub_list = [b'new_table']
         self.comms = comms.Comms(sys_settings_fname)
-        self.comms.set_subscriptions(self.sub_list)
 
     def smart_arp_listen_routine(self):
         # Get an ethernet packet
@@ -23,11 +23,6 @@ class SmartARPListener(arppy.ARPListener):
             self.unpack_eth_payload_into_arp_data()
             self.comms.send_msg('new_arp_pkt', self.get_styled_arp_data())
 
-        # Check if a new mac table was sent
-        msg = self.comms.recv_msg()
-        if msg:
-            self.replace_old_table(msg)
-
     def is_known_broadcast(self):
         dst_mac = self.ethernet_data['dest_mac_as_bytes']
         cond1 = dst_mac == c.arp_broadcast_eth_dest_mac
@@ -37,9 +32,6 @@ class SmartARPListener(arppy.ARPListener):
 
         return cond1 and cond2
 
-    def replace_old_table(self, msg):
-        pass
-
     def clean_up(self):
         super().clean_up()
         self.comms.close_pub_sub()
@@ -47,13 +39,18 @@ class SmartARPListener(arppy.ARPListener):
 
 class SmartARPSender(arppy.ARPSender):
 
-    def __init__(self, sys_settings_fname=None):
+    def __init__(self, sys_settings_fname, device_table_fname):
         super().__init__(sys_settings_fname)
+        self.device_table_fname = device_table_fname
         self.sub_list = [b'new_table']
         self.comms = comms.Comms(sys_settings_fname)
         self.comms.set_subscriptions(self.sub_list)
+
+        self.device_list = devtbl.load_device_table(device_table_fname)
+        self.device_lut = devtbl.update_device_lut(self.device_list)
+
         self.broadcast_interval = 60.0
-        self.num_direct_between_broadcasts = 2
+        self.num_direct_between_broadcasts = 3
         self.direct_interval = \
             self.broadcast_interval / (self.num_direct_between_broadcasts + 1)
 
@@ -65,7 +62,7 @@ class SmartARPSender(arppy.ARPSender):
 
         # Periodically send a broadcast to update IPs
         # and find new MACs
-        if cur_time - self.prev_broadcast_time > 30.0:
+        if cur_time - self.prev_broadcast_time > self.broadcast_interval:
             print('broadcast', cur_time)
             self.prev_broadcast_time = cur_time
             self.send_broadcast()
@@ -95,10 +92,15 @@ class SmartARPSender(arppy.ARPSender):
             time.sleep(0.006)
 
     def send_direct(self):
-        pass
+        for key in self.device_lut:
+            dst_mac = self.device_lut[key]['mac']
+            dst_ip = self.device_lut[key]['ip']
+            self.send_arp_request(dst_ip, dst_mac)
+            time.sleep(0.006)
 
     def replace_old_table(self, msg):
-        pass
+        self.device_list = json.loads(msg[1].decode('utf-8'))
+        self.device_lut = devtbl.update_device_lut(self.device_list)
 
     def clean_up(self):
         super().clean_up()
@@ -108,6 +110,7 @@ class SmartARPSender(arppy.ARPSender):
 if __name__ == '__main__':
     import sys
     sys_settings_fname = 'sys_settings.json'
+    device_table_fname = 'device_table.json'
 
     if 'listen' in sys.argv:
         listener = SmartARPListener(sys_settings_fname)
@@ -120,7 +123,7 @@ if __name__ == '__main__':
                 is_running = False
                 listener.clean_up()
     elif 'send' in sys.argv:
-        sender = SmartARPSender(sys_settings_fname)
+        sender = SmartARPSender(sys_settings_fname, device_table_fname)
 
         is_running = True
         while is_running:

@@ -2,6 +2,7 @@ import comms as comms
 import json as json
 import uuid as uuid
 import time as time
+import datetime as datetime
 
 
 class DeviceTable:
@@ -12,26 +13,8 @@ class DeviceTable:
         self.comms = comms.Comms(sys_settings_fname)
         self.comms.set_subscriptions(self.sub_list)
 
-        self.load_device_table(device_table_fname)
-        self.update_device_lut()
-
-    def load_device_table(self, device_table_fname):
-        # TODO: Load from db
-        with open(device_table_fname, 'r') as f:
-            tmp_dict = json.load(f)
-            self.device_list = tmp_dict['devices']
-
-    def save_device_table(self):
-        with open(self.device_table_fname, 'w') as f:
-            out_dict = {
-                'devices': self.device_list
-            }
-            json.dump(out_dict, f, indent=2)
-
-    def update_device_lut(self):
-        self.device_lut = {
-            dev['mac']: dev for dev in self.device_list
-        }
+        self.device_list = load_device_table(device_table_fname)
+        self.device_lut = update_device_lut(self.device_list)
 
     def run_device_table_routine(self):
         msg = self.comms.recv_msg()
@@ -46,31 +29,58 @@ class DeviceTable:
         src_mac = payload['sender_mac_as_str_with_colons']
         src_ip = payload['sender_ip_as_str_with_dots']
 
-        table_was_updated = False
+        pub_new_table_flag = False
+        utc_now = datetime.datetime.utcnow()
         if src_mac in self.device_lut.keys():
             dev_ip = self.device_lut[src_mac]['ip']
             if dev_ip != src_ip:
-                table_was_updated = True
+                pub_new_table_flag = True
                 self.device_lut[src_mac]['ip'] = src_ip
+            self.device_lut[src_mac]['last_seen'] = \
+                utc_now.isoformat() + '+00:00'
         else:
             new_device = {
                 'id': str(uuid.uuid4()),
                 'mac': src_mac,
                 'ip': src_ip,
                 'alias': '',
+                'last_seen': utc_now.isoformat() + '+00:00'
             }
             self.device_list.append(new_device)
-            self.update_device_lut()
-            table_was_updated = True
+            self.device_lut = update_device_lut(self.device_list)
+            pub_new_table_flag = True
 
-        if table_was_updated:
-            # TODO: update database
-            self.save_device_table()
+        # TODO: save data to database
+        save_device_table(self.device_table_fname, self.device_list)
 
+        if pub_new_table_flag:
+            self.comms.send_msg('new_table', self.device_list)
             # TODO: publish new table
 
     def clean_up(self):
         self.comms.close_pub_sub()
+
+
+def load_device_table(device_table_fname):
+    # TODO: Load from db
+    with open(device_table_fname, 'r') as f:
+        tmp_dict = json.load(f)
+    return tmp_dict['devices']
+
+
+def save_device_table(device_table_fname, device_list):
+    with open(device_table_fname, 'w') as f:
+        out_dict = {
+            'devices': device_list
+        }
+        json.dump(out_dict, f, indent=2)
+
+
+def update_device_lut(device_list):
+    device_lut = {
+        dev['mac']: dev for dev in device_list
+    }
+    return device_lut
 
 
 def main():
