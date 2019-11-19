@@ -1,0 +1,34 @@
+{
+  "gspread_cred_fname": "./creds/homenet-fb09f2ff9ed5.json",
+  "gspread_id": "1w89cfQO26Qr_t_qX2L943JvN9CYPML8CUBmBCpy7_Kc",
+  "gspread_sharing_list": [
+    {
+      "email": "peterhillyard@gmail.com",
+      "perm_type": "user",
+      "role": "writer"
+    }
+  ],
+  "gspread_worksheets": [
+    {
+      "title": "devices",
+      "index": "",
+      "header": [
+        "id",
+        "mac",
+        "ip"
+      ]
+    },
+    {
+      "title": "arps",
+      "index": "",
+      "header": [
+        "id",
+        "src_mac",
+        "src_ip",
+        "dst_mac",
+        "dst_ip",
+        "datetime"
+      ]
+    }
+  ]
+}
