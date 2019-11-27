@@ -1,6 +1,6 @@
 {
-  "gspread_cred_fname": "./creds/homenet-fb09f2ff9ed5.json",
-  "gspread_id": "1w89cfQO26Qr_t_qX2L943JvN9CYPML8CUBmBCpy7_Kc",
+  "gspread_cred_fname": "./creds/homenet-XXXXXXXXXXXX.json",
+  "gspread_id": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
   "gspread_sharing_list": [
     {
       "email": "peterhillyard@gmail.com",

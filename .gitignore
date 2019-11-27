@@ -1,6 +1,5 @@
 # directories
 venv*/
-creds/
 __pycache__
 
 # configs
@@ -10,3 +9,5 @@ __pycache__
 *.pyc
 sys_settings.json
 device_table.json
+homenet-fb09f2ff9ed5.json
+gspread_settings.json
