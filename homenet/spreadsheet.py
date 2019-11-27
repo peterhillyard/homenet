@@ -3,7 +3,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 import json as json
 
 
-class GSDatabase:
+class GSDatabaseInterface:
 
     def __init__(self, gs_settings_fname):
         self.gs_settings_fname = gs_settings_fname
@@ -76,7 +76,7 @@ class GSDatabase:
 
 
 if __name__ == '__main__':
-    gsd = GSDatabase('gspread_settings.json')
+    gsd = GSDatabaseInterface('gspread_settings.json')
 
     gsd.del_all_spreadsheets()
     gsd.create_database()
