@@ -1,17 +1,28 @@
 import gspread as gs
 from oauth2client.service_account import ServiceAccountCredentials
+import datetime as datetime
+import comms as comms
+import time as time
 import json as json
+import uuid as uuid
 
 
 class GSDatabaseInterface:
 
-    def __init__(self, gs_settings_fname):
+    def __init__(self, sys_settings_fname, gs_settings_fname):
+        self.sub_list = [b'new_arp_pkt', b'new_table']
+        self.comms = comms.Comms(sys_settings_fname)
+        self.comms.set_subscriptions(self.sub_list)
+
         self.gs_settings_fname = gs_settings_fname
         self.load_sys_settings(gs_settings_fname)
         self.open_client(gs_settings_fname)
         self.create_database()
         self.open_spreadsheet()
         self.open_worksheets()
+
+        self.arp_data_list = []
+        self.last_arp_data_dump = 0
 
     def load_sys_settings(self, gs_settings_fname):
         with open(gs_settings_fname, 'r') as f:
@@ -74,15 +85,63 @@ class GSDatabaseInterface:
         self.sheet = self.client.open_by_key(id)
 
     def open_worksheets(self):
+        self.worksheet_lut = {}
         for ws_meta in self.settings_dict['gspread_worksheets']:
+            self.worksheet_lut[ws_meta['title']] = ws_meta
             if ws_meta['title'] == 'devices':
-                self.devices_ws = self.sheet.get_worksheet(ws_meta['index'])
+                self.devices_ws = self.sheet.worksheet(ws_meta['title'])
             if ws_meta['title'] == 'arps':
-                self.arps_ws = self.sheet.get_worksheet(ws_meta['index'])
+                self.arps_ws = self.sheet.worksheet(ws_meta['title'])
 
     def update_devices(self, device_obj_list):
-        self.devices_ws.clear()
-        # for device_obj in device_obj_list:
+        for device_obj in device_obj_list:
+            list_to_add = [device_obj[key] for key in ['id', 'mac', 'ip']]
+
+        self.sheet.values_clear('devices!A2:C')
+        self.sheet.values_update(
+            'devices!A2:C',
+            params={
+                'valueInputOption': 'USER_ENTERED'
+            },
+            body={
+                'values': list_to_add
+            }
+        )
+
+    def append_to_arps_data(self, arp_data):
+        utc_now = datetime.datetime.utcnow()
+        datetime_str = utc_now.isoformat() + '+00:00'
+        uid = str(uuid.uuid4())
+        values = [
+            uid,
+            arp_data['sender_mac_as_str_with_colons'],
+            arp_data['sender_ip_as_str_with_dots'],
+            arp_data['target_mac_as_str_with_colons'],
+            arp_data['target_ip_as_str_with_dots'],
+            datetime_str,
+        ]
+        self.arp_data_list.append(values)
+
+    def update_arps_data(self):
+
+        if not self.arp_data_list:
+            return
+
+        r = 'arps!A2:F'
+
+        q_params = {
+            'insertDataOption': 'INSERT_ROWS',
+            'valueInputOption': 'RAW'
+        }
+
+        body = {
+            'range': r,
+            'majorDimension': 'ROWS',
+            'values': self.arp_data_list
+        }
+
+        self.sheet.values_append(range=r, params=q_params, body=body)
+        self.arp_data_list = []
 
     def del_all_spreadsheets(self):
         sp_files = self.client.list_spreadsheet_files()
@@ -93,12 +152,34 @@ class GSDatabaseInterface:
             except Exception:
                 pass
 
+    def run_database_interface_routine(self):
+        msg = self.comms.recv_msg()
+        if not msg:
+            time.sleep(0.1)
+            return
 
+        if msg[0] == b'new_arp_pkt':
+            arp_data = json.loads(msg[1].decode('utf-8'))
+            self.append_to_arps_data(arp_data)
+            if time.time() - self.last_arp_data_dump > 2.0:
+                self.update_arps_data()
+                self.last_arp_data_dump = time.time()
+
+        if msg[0] == b'new_table':
+            device_list = json.loads(msg[1].decode('utf-8'))
+            print(device_list)
+
+        # Periodically send out
 
 
 if __name__ == '__main__':
-    gsd = GSDatabaseInterface('gspread_settings.json')
+    gsdi = GSDatabaseInterface('sys_settings.json', 'gspread_settings.json')
 
-    # gsd.del_all_spreadsheets()
-    # gsd.create_database()
-    # gsd.update_devices([])
+    # gsdi.update_arps()
+
+    is_running = True
+    while is_running:
+        try:
+            gsdi.run_database_interface_routine()
+        except KeyboardInterrupt:
+            is_running = False
