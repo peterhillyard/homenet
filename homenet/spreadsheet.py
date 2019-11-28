@@ -198,4 +198,7 @@ if __name__ == '__main__':
             print('Closing up')
         except ValueError:
             print('re-creating database interface')
-            gsdi = GSDatabaseInterface('sys_settings.json', 'gspread_settings.json')
+            gsdi = GSDatabaseInterface(
+                'sys_settings.json',
+                'gspread_settings.json'
+            )
