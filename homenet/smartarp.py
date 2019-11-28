@@ -63,7 +63,7 @@ class SmartARPSender(arppy.ARPSender):
         # Periodically send a broadcast to update IPs
         # and find new MACs
         if cur_time - self.prev_broadcast_time > self.broadcast_interval:
-            print('broadcast', cur_time)
+            # print('broadcast', cur_time)
             self.prev_broadcast_time = cur_time
             self.send_broadcast()
 
@@ -71,7 +71,7 @@ class SmartARPSender(arppy.ARPSender):
         # each mac/ip pair in the table
         if (cur_time - self.prev_direct_arp_time > self.direct_interval) and \
            (cur_time - self.prev_broadcast_time > self.direct_interval):
-            print('direct', cur_time)
+            # print('direct', cur_time)
             self.prev_direct_arp_time = cur_time
             self.send_direct()
 
@@ -116,19 +116,23 @@ if __name__ == '__main__':
         listener = SmartARPListener(sys_settings_fname)
 
         is_running = True
+        print('Starting arp listener...')
         while is_running:
             try:
                 listener.smart_arp_listen_routine()
             except KeyboardInterrupt:
+                print('closing arp listener')
                 is_running = False
                 listener.clean_up()
     elif 'send' in sys.argv:
         sender = SmartARPSender(sys_settings_fname, device_table_fname)
 
         is_running = True
+        print('Starting arp sender...')
         while is_running:
             try:
                 sender.smart_arp_send_routine()
             except KeyboardInterrupt:
+                print('Closing arp sender')
                 is_running = False
                 sender.clean_up()

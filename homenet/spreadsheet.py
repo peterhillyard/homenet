@@ -94,23 +94,27 @@ class GSDatabaseInterface:
                 self.arps_ws = self.sheet.worksheet(ws_meta['title'])
 
     def update_devices(self, device_obj_list):
+        values = []
         for device_obj in device_obj_list:
-            list_to_add = [device_obj[key] for key in ['id', 'mac', 'ip']]
+            values.append([device_obj[key] for key in ['id', 'mac', 'ip']])
 
-        self.sheet.values_clear('devices!A2:C')
-        self.sheet.values_update(
-            'devices!A2:C',
-            params={
-                'valueInputOption': 'USER_ENTERED'
-            },
-            body={
-                'values': list_to_add
-            }
-        )
+        try:
+            self.sheet.values_clear('devices!A2:C')
+            self.sheet.values_update(
+                'devices!A2:C',
+                params={
+                    'valueInputOption': 'USER_ENTERED'
+                },
+                body={
+                    'values': values
+                }
+            )
+        except Exception:
+            raise ValueError
 
     def append_to_arps_data(self, arp_data):
-        utc_now = datetime.datetime.utcnow()
-        datetime_str = utc_now.isoformat() + '+00:00'
+        now = datetime.datetime.now()
+        datetime_str = now.isoformat()
         uid = str(uuid.uuid4())
         values = [
             uid,
@@ -140,8 +144,11 @@ class GSDatabaseInterface:
             'values': self.arp_data_list
         }
 
-        self.sheet.values_append(range=r, params=q_params, body=body)
-        self.arp_data_list = []
+        try:
+            self.sheet.values_append(range=r, params=q_params, body=body)
+            self.arp_data_list = []
+        except Exception:
+            raise ValueError
 
     def del_all_spreadsheets(self):
         sp_files = self.client.list_spreadsheet_files()
@@ -162,14 +169,18 @@ class GSDatabaseInterface:
             arp_data = json.loads(msg[1].decode('utf-8'))
             self.append_to_arps_data(arp_data)
             if time.time() - self.last_arp_data_dump > 2.0:
-                self.update_arps_data()
-                self.last_arp_data_dump = time.time()
+                try:
+                    self.update_arps_data()
+                    self.last_arp_data_dump = time.time()
+                except ValueError:
+                    raise ValueError
 
         if msg[0] == b'new_table':
             device_list = json.loads(msg[1].decode('utf-8'))
-            print(device_list)
-
-        # Periodically send out
+            try:
+                self.update_devices(device_list)
+            except ValueError:
+                raise ValueError
 
 
 if __name__ == '__main__':
@@ -178,8 +189,13 @@ if __name__ == '__main__':
     # gsdi.update_arps()
 
     is_running = True
+    print('starting database interface...')
     while is_running:
         try:
             gsdi.run_database_interface_routine()
         except KeyboardInterrupt:
             is_running = False
+            print('Closing up')
+        except ValueError:
+            print('re-creating database interface')
+            gsdi = GSDatabaseInterface('sys_settings.json', 'gspread_settings.json')
