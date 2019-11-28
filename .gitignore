@@ -9,3 +9,5 @@ __pycache__
 *.pyc
 sys_settings.json
 device_table.json
+homenet-*.json
+gspread_settings.json

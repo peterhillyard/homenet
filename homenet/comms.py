@@ -76,7 +76,6 @@ class CommsForwarder:
             # print(e)
             print("bringing down zmq device")
         finally:
-            pass
             self.frontend.close()
             self.backend.close()
             self.context.term()
