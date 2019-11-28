@@ -4,7 +4,10 @@ Find out what MAC addresses are on and off a home network.
 
 # How to start
 
-This project supports Python 3.5.2 so that it can run on a Raspberry Pi. Setup a Python virtual environment that runs Python 3.5.2
+This project supports Python 3.5.2 so that it can run on a Raspberry Pi.
+
+## Setup a virtual environment
+Setup a Python virtual environment that runs Python 3.5.2
 
 ```python3.5.2 -m venv ./venv```
 
@@ -20,17 +23,30 @@ Then install all the dependancies
 
 ```python -m pip install -r requirements.txt```
 
-Then make a copy of `example_sys_settings.json` and name it `sys_settings.json`. Edit the `interface_name` value to match which network interface your device will be using to sniff for and send ARP requests/replys.
+## Get Google Sheets and Drive credentials
+TODO: Describe how to setup credentials for a google sheet.
 
-Then make a copy of `example_device_table.json` and name it `device_table.json`. Remove the entry in the `devices` key-value pair.
+## Create sys_settings.json
+Then make a copy of `example_sys_settings.json` and name it `sys_settings.json`. Edit the `interface_name` value to match which network interface your device will be using to sniff for and send ARP requests/replies. Run a `ifconfig` in a terminal to get the interface name.
 
-Then to run, open four terminals and navigate to the homenet directory with the Python scripts inside. Run one command per terminal. Make sure that you are running as root because the sockets package requires root access. Also make sure that each terminal is running your Python 3.5.2 environment.
+## Create device_table.json
+Then make a copy of `example_device_table.json` and name it `device_table.json`.
+
+## Create gspread_settings.json
+Then make a copy of `example_gspread_settings.json` and name it `gspread_settings.json`. In the `gspread_cred_fname` field, type in the path and filename of the credentials json file you downloaded from the Google Sheets API step. Next edit the one user object to the `gspread_sharing_list` by adding in your email. You can always add more users later by opening the Google Sheet in a web browser.
+
+## Copy in project credentials
+When you download the credentials json during the Google API step, move that file under the creds directory.
+
+## Running the Homenet Python scripts
+Then to run, open a tmux session so that you can get back to the consoles running the scripts you will run. In the tmux session open five terminals and navigate to the homenet directory with the Python scripts inside. Run one command per terminal. Make sure that you are running as root because the sockets package requires root access. Also make sure that each terminal is running your Python 3.5.2 environment. Run the scripts in this order.
 
 ```python
 python comms.py
 python smartarp.py listen
 python smartarp.py send
 python devicetable.py
+python spreadsheet.py
 ```
 
 # Examples
