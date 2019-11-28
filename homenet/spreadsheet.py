@@ -9,6 +9,9 @@ class GSDatabaseInterface:
         self.gs_settings_fname = gs_settings_fname
         self.load_sys_settings(gs_settings_fname)
         self.open_client(gs_settings_fname)
+        self.create_database()
+        self.open_spreadsheet()
+        self.open_worksheets()
 
     def load_sys_settings(self, gs_settings_fname):
         with open(gs_settings_fname, 'r') as f:
@@ -29,12 +32,13 @@ class GSDatabaseInterface:
 
         self.client = gs.authorize(creds)
 
-    def is_database_created(self):
-        return self.settings_dict['gspread_id'] != ''
-
     def create_database(self):
-        if self.is_database_created():
+        try:
+            tmp = self.client.open_by_key(self.settings_dict['gspread_id'])
+            tmp.title
             return
+        except Exception:
+            pass
 
         # Create the new spreadsheet, save the id
         sheet = self.client.create('homenet')
@@ -51,14 +55,14 @@ class GSDatabaseInterface:
                 )
 
         # Set up worksheets
-        for ii, ws in enumerate(self.settings_dict['gspread_worksheets']):
+        for ii, ws_meta in enumerate(self.settings_dict['gspread_worksheets']):
             ws = sheet.add_worksheet(
-                ws['title'],
+                ws_meta['title'],
                 2,
-                len(ws['header'])
+                len(ws_meta['header'])
             )
 
-            ws.insert_row(ws['header'])
+            ws.insert_row(ws_meta['header'])
             self.settings_dict['gspread_worksheets'][ii]['index'] = ws.id
 
         # Update the system settings
@@ -69,14 +73,32 @@ class GSDatabaseInterface:
         id = self.settings_dict['gspread_id']
         self.sheet = self.client.open_by_key(id)
 
+    def open_worksheets(self):
+        for ws_meta in self.settings_dict['gspread_worksheets']:
+            if ws_meta['title'] == 'devices':
+                self.devices_ws = self.sheet.get_worksheet(ws_meta['index'])
+            if ws_meta['title'] == 'arps':
+                self.arps_ws = self.sheet.get_worksheet(ws_meta['index'])
+
+    def update_devices(self, device_obj_list):
+        self.devices_ws.clear()
+        # for device_obj in device_obj_list:
+
     def del_all_spreadsheets(self):
         sp_files = self.client.list_spreadsheet_files()
         for s in sp_files:
-            self.client.del_spreadsheet(s['id'])
+            print(s['id'])
+            try:
+                self.client.del_spreadsheet(s['id'])
+            except Exception:
+                pass
+
+
 
 
 if __name__ == '__main__':
     gsd = GSDatabaseInterface('gspread_settings.json')
 
-    gsd.del_all_spreadsheets()
-    gsd.create_database()
+    # gsd.del_all_spreadsheets()
+    # gsd.create_database()
+    # gsd.update_devices([])
