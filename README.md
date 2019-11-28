@@ -27,7 +27,7 @@ Then install all the dependancies
 TODO: Describe how to setup credentials for a google sheet.
 
 ## Create sys_settings.json
-Then make a copy of `example_sys_settings.json` and name it `sys_settings.json`. Edit the `interface_name` value to match which network interface your device will be using to sniff for and send ARP requests/replies. Run a `ifconfig` in a terminal to get the interface name.
+Then make a copy of `example_sys_settings.json` and name it `sys_settings.json`. Edit the `interface_name` value to match which network interface your device will be using to sniff for and send ARP requests/replies. Run a `ifconfig` in a terminal to get the interface name. You can also set the broadcast interval and the number of direct messages between broadcasts.
 
 ## Create device_table.json
 Then make a copy of `example_device_table.json` and name it `device_table.json`.

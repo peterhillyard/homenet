@@ -1,5 +1,7 @@
 {
   "interface_name": "wlan0",
   "pub_facing_endpoint": "ipc:///tmp/arp_pub_facing_endpoint",
-  "sub_facing_endpoint": "ipc:///tmp/arp_sub_facing_endpoint"
+  "sub_facing_endpoint": "ipc:///tmp/arp_sub_facing_endpoint",
+  "broadcast_interval_s": 60,
+  "num_direct_msgs_between_broadcast": 3
 }

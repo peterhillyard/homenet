@@ -49,30 +49,41 @@ class SmartARPSender(arppy.ARPSender):
         self.device_list = devtbl.load_device_table(device_table_fname)
         self.device_lut = devtbl.update_device_lut(self.device_list)
 
-        self.broadcast_interval = 60.0
-        self.num_direct_between_broadcasts = 3
-        self.direct_interval = \
-            self.broadcast_interval / (self.num_direct_between_broadcasts + 1)
+        self.setup_broadcast_and_direct_intervals(sys_settings_fname)
 
-        self.prev_broadcast_time = 0
-        self.prev_direct_arp_time = 0
+        self.prev_broadcast_t = 0
+        self.prev_direct_arp_t = 0
+
+    def setup_broadcast_and_direct_intervals(self, sys_settings_fname):
+        with open(sys_settings_fname, 'r') as f:
+            self.sys_settings = json.load(f)
+
+        self.broadcast_interval_s = max(
+            self.sys_settings['broadcast_interval_s'],
+            10
+        )
+        num_direct = self.sys_settings['num_direct_msgs_between_broadcast']
+        self.direct_interval_s = max(
+            self.broadcast_interval_s / (num_direct + 1),
+            5
+        )
 
     def smart_arp_send_routine(self):
         cur_time = time.time()
 
         # Periodically send a broadcast to update IPs
         # and find new MACs
-        if cur_time - self.prev_broadcast_time > self.broadcast_interval:
+        if cur_time - self.prev_broadcast_t > self.broadcast_interval_s:
             # print('broadcast', cur_time)
-            self.prev_broadcast_time = cur_time
+            self.prev_broadcast_t = cur_time
             self.send_broadcast()
 
         # Periodically send direct arp requests to
         # each mac/ip pair in the table
-        if (cur_time - self.prev_direct_arp_time > self.direct_interval) and \
-           (cur_time - self.prev_broadcast_time > self.direct_interval):
+        if (cur_time - self.prev_direct_arp_t > self.direct_interval_s) and \
+           (cur_time - self.prev_broadcast_t > self.direct_interval_s):
             # print('direct', cur_time)
-            self.prev_direct_arp_time = cur_time
+            self.prev_direct_arp_t = cur_time
             self.send_direct()
 
         # Check for new mac tables
