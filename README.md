@@ -24,7 +24,17 @@ Then install all the dependancies
 ```python -m pip install -r requirements.txt```
 
 ## Get Google Sheets and Drive credentials
-TODO: Describe how to setup credentials for a google sheet.
+Follow the steps described in [this article](https://towardsdatascience.com/accessing-google-spreadsheet-data-using-python-90a5bc214fd2). I have made a few updates to the article which you should follow. The article is useful because it has some screen shots.
+
+Start by going to [Google's console for developers](https://console.developers.google.com/). Make sure you are using the desired account if you have multiple google accounts.
+
+Now create a new project. I did this by clicking the down arrow to the right of the "Google APIs" logo in the top left corner. Then click "New Project". Name the project. For consistancy, name it "homenet". Leave the default value in the Location field. Then click Create.
+
+Next click the "Enable APIs and Services" button at the top of the window. Now search for Google Drive. Click Enable. After the page reloads, click the "Create Credentials" at the top right. Select Google Drive API in the "Which API are you using" drop down. Then select Web Server under the "Where will you be call the API from" drop down. Then select Application Data under the "What data will you be accessing" heading. Then select "No, I'm not using them" under the "Are you planning to use this API with App Engine or Compute Engine." Then click the "What credentials do I need?" button.
+
+On the next screen, type in "homenet" in the "Serivce account name" field. Select Project >> Editor in the Role field. Make sure JSON is selected and then click Create. This will download a credentials file which you will save in the `homenet/homenet/creds/` directory.
+
+Now click the Dashboard menu button on the right, and then click "Enable APIs and Services" again. This time search for Google Sheets. Enable this API. You do not need to create credentials for Google Sheets.
 
 ## Create sys_settings.json
 Then make a copy of `example_sys_settings.json` and name it `sys_settings.json`. Edit the `interface_name` value to match which network interface your device will be using to sniff for and send ARP requests/replies. Run a `ifconfig` in a terminal to get the interface name. You can also set the broadcast interval and the number of direct messages between broadcasts.
