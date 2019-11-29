@@ -15,7 +15,8 @@
       "header": [
         "id",
         "mac",
-        "ip"
+        "ip",
+        "last_seen"
       ]
     },
     {

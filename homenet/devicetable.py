@@ -1,4 +1,5 @@
 import comms as comms
+import datetime as datetime
 import json as json
 import uuid as uuid
 import time as time
@@ -15,6 +16,7 @@ class DeviceTable:
         self.device_list = load_device_table(device_table_fname)
         self.device_lut = update_device_lut(self.device_list)
         self.comms.send_msg('new_table', self.device_list)
+        self.last_new_table_pub_t = 0
 
     def run_device_table_routine(self):
         msg = self.comms.recv_msg()
@@ -30,7 +32,9 @@ class DeviceTable:
         src_ip = payload['sender_ip_as_str_with_dots']
 
         pub_new_table_flag = False
+        now_iso_fmt = datetime.datetime.now().isoformat()
         if src_mac in self.device_lut.keys():
+            self.device_lut[src_mac]['last_seen'] = now_iso_fmt
             device_ip = self.device_lut[src_mac]['ip']
             if device_ip != src_ip:
                 pub_new_table_flag = True
@@ -40,6 +44,7 @@ class DeviceTable:
                 'id': str(uuid.uuid4()),
                 'mac': src_mac,
                 'ip': src_ip,
+                'last_seen': now_iso_fmt
             }
             self.device_list.append(new_device)
             self.device_lut = update_device_lut(self.device_list)
@@ -48,7 +53,8 @@ class DeviceTable:
         # TODO: save data to database
         save_device_table(self.device_table_fname, self.device_list)
 
-        if pub_new_table_flag:
+        if pub_new_table_flag or time.time() - self.last_new_table_pub_t > 5.0:
+            self.last_new_table_pub_t = time.time()
             self.comms.send_msg('new_table', self.device_list)
 
     def clean_up(self):

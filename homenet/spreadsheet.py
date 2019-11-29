@@ -95,13 +95,14 @@ class GSDatabaseInterface:
 
     def update_devices(self, device_obj_list):
         values = []
+        key_list = self.worksheet_lut['devices']['header']
         for device_obj in device_obj_list:
-            values.append([device_obj[key] for key in ['id', 'mac', 'ip']])
+            values.append([device_obj[key] for key in key_list])
 
         try:
-            self.sheet.values_clear('devices!A2:C')
+            self.sheet.values_clear('devices!A2:D')
             self.sheet.values_update(
-                'devices!A2:C',
+                'devices!A2:D',
                 params={
                     'valueInputOption': 'USER_ENTERED'
                 },
@@ -145,7 +146,8 @@ class GSDatabaseInterface:
         }
 
         try:
-            self.sheet.values_append(range=r, params=q_params, body=body)
+            if False:
+                self.sheet.values_append(range=r, params=q_params, body=body)
             self.arp_data_list = []
         except Exception:
             raise ValueError
@@ -185,8 +187,6 @@ class GSDatabaseInterface:
 
 if __name__ == '__main__':
     gsdi = GSDatabaseInterface('sys_settings.json', 'gspread_settings.json')
-
-    # gsdi.update_arps()
 
     is_running = True
     print('starting database interface...')
