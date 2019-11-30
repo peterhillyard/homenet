@@ -1,35 +1,60 @@
 {
   "gspread_cred_fname": "./creds/homenet-XXXXXXXXXXXX.json",
-  "gspread_id": "",
+  "devices_spreadsheet": {
+    "title": "homenet_devices",
+    "key": "",
+    "worksheets": [
+      {
+        "title": "devices",
+        "index": 0,
+        "header": [
+          "id",
+          "mac",
+          "ip",
+          "last_seen"
+        ]
+      },
+      {
+        "title": "stats",
+        "index": 1,
+        "header": [
+          "mac",
+          "ip",
+          "alias",
+          "last_seen",
+          "last_seen_datetime",
+          "days since last seen",
+          "hours since last seen",
+          "minutes since last seen",
+          "seconds since last seen",
+          "now"
+        ]
+      }
+    ]
+  },
+  "arp_pkt_spreadsheet": {
+    "title_prefix": "homenet_arp_",
+    "worksheets": [
+      {
+        "title": "arps",
+        "index": 0,
+        "header": [
+          "id",
+          "src_mac",
+          "src_ip",
+          "dst_mac",
+          "dst_ip",
+          "datetime"
+        ]
+      }
+    ]
+  },
   "gspread_sharing_list": [
     {
       "email": "user@email.com",
       "perm_type": "user",
-      "role": "writer"
-    }
-  ],
-  "gspread_worksheets": [
-    {
-      "title": "devices",
-      "index": "",
-      "header": [
-        "id",
-        "mac",
-        "ip",
-        "last_seen"
-      ]
-    },
-    {
-      "title": "arps",
-      "index": "",
-      "header": [
-        "id",
-        "src_mac",
-        "src_ip",
-        "dst_mac",
-        "dst_ip",
-        "datetime"
-      ]
+      "role": "writer",
+      "notify": false
     }
   ]
 }
